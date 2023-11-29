@@ -2,13 +2,17 @@ import { Client } from "discord.js";
 import { deployCommands } from "./deploy-commands";
 import { commands } from "./commands";
 import { config } from "./config";
+import { startServer } from './backend/server';
+
 
 const client = new Client({
-    intents: ["Guilds", "GuildMessages", "DirectMessages"],
+    intents: ["Guilds", "GuildMessages"],
 });
 
 client.once("ready", () => {
     console.log("Discord bot is ready! 🤖");
+    console.log('Starting auth server...');
+    startServer();
 });
 
 client.on("guildCreate", async (guild) => {
@@ -24,7 +28,7 @@ client.on("interactionCreate", async (interaction) => {
     if (commands[commandName as keyof typeof commands]) {
         commands[commandName as keyof typeof commands].execute(interaction);
     }
-})
+});
 
 client.login(config.DISCORD_TOKEN);
 
