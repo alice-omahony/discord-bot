@@ -1,7 +1,7 @@
 version: '1'
 services:
-  myapp:
-    container_name: discordbot
+  discordbot:
+    container_name: jeeves-bot
     restart: always
     build:
       context: .
@@ -11,5 +11,19 @@ services:
     volumes:
       - ./:/discordbot/dev
       - ignore:/discordbot/dev/node_modules/
+
+  mysql:
+    container_name: mysql
+    build:
+      dockerfile: DockerfileDb
+      context: .
+      args:
+        - MYSQL_DATABASE=${MYSQL_DATABASE}
+        - MYSQL_USER=${MYSQL_USER}
+        - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+        - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    ports:
+      - "${MYSQL_PORT}:3306"
+
 volumes:
   ignore:
