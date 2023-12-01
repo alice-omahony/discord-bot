@@ -1,15 +1,16 @@
-FROM node:21.2-alpine
+FROM node:21-alpine
+WORKDIR /usr/local/apps/myapp
 
-RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
-WORKDIR /home/node/app
+COPY package.json ./
+RUN npm install && npm cache clean --force
+ENV PATH=/usr/local/myapp/node_modules/.bin:$PATH
 
-COPY package*.json ./
+WORKDIR /usr/local/apps/myapp/dev
+COPY tsconfig.json ./
 
-USER node
+COPY src ./src
+COPY .env ./
 
-RUN npm install
-COPY --chown=node:node . .
+EXPOSE 9001
 
-EXPOSE 8080
-
-CMD [ "node", "app.js" ]
+CMD ["npm", "run", "dev"]
