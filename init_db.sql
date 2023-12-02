@@ -17,7 +17,7 @@ CREATE TABLE quotes (
   name varchar(255) NOT NULL,
   content varchar(255) NOT NULL,
   reporter varchar(255) NOT NULL,
-  reported_at timestamp NOT NULL
+  reported_at integer NOT NULL
 );
 
 -- quotes {
