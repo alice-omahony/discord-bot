@@ -1,29 +1,35 @@
-version: '1'
+version: '3.8'
 services:
   discordbot:
+    depends_on:
+      - postgres
     container_name: jeeves-bot
     restart: always
     build:
       context: .
       dockerfile: Dockerfile
+    links:
+      - postgres
     ports:
       - 9001:9001
     volumes:
       - ./:/discordbot/dev
       - ignore:/discordbot/dev/node_modules/
 
-  mysql:
-    container_name: mysql
-    build:
-      dockerfile: DockerfileDb
-      context: .
-      args:
-        - MYSQL_DATABASE=${MYSQL_DATABASE}
-        - MYSQL_USER=${MYSQL_USER}
-        - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-        - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+  postgres:
+    container_name: postgres
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=$DB_USER
+      - POSTGRES_PASSWORD=$DB_PASSWORD
     ports:
-      - "${MYSQL_PORT}:3306"
+      - $DB_PORT:5432
+    volumes: 
+      - db:/var/lib/postgresql/data
+      - ./init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
 
 volumes:
   ignore:
+  db:
+    driver: local
