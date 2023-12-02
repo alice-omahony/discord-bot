@@ -18,20 +18,23 @@ app.get("/", (_, res) => {
 });
 
 app.get("/jeeves-bot/api/auth/redirect", async (req: ExpressRequest , res: ExpressResponse) => {
-  const { code } = req.query;
-  const { data } = await getAuthToken(code as string);
-  const { access_token, expires_in, refresh_token, scope} = data;
-
   if (!dbClient) {
     res.send("Conenct to DB currently unavailable, authorization not possible.")
   }
-  const db = dbClient as DatabaseClient;
+
+  const { code } = req.query;
+  const { data } = await getAuthToken(code as string);
+  const { access_token, expires_in, refresh_token, scope} = data;
+  const db: DatabaseClient = dbClient as DatabaseClient;
+
+  const expiresAt: number = Math.floor(new Date().getTime() / 1000) + parseInt(expires_in);
+  const scopesList: string[] = (scope as string).split(" ")
 
   db.saveAuthToken(config.DISCORD_CLIENT_ID, {
     token: access_token,
     refresh_token: refresh_token,
-    expire: expires_in,
-    scopes: (scope as string).split(" ")
+    expire: expiresAt,
+    scopes: scopesList
   });
 
   res.send(200);
