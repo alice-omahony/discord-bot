@@ -12,27 +12,8 @@ const client = new Client({
 
 client.once("ready", async () => {
     console.log("Discord bot is ready! 🤖");
-    console.log('Starting auth server...');
     startServer();
   });
-
-
-      // try {
-      //   const query = {
-      //     // give the query a unique name
-      //     name: 'fetch-quote',
-      //     text: 'SELECT * FROM quote WHERE id = $1',
-      //     values: [1],
-      //   }
-
-
-      //   const res = await client.query(query);
-      //   console.log(res);
-      // } catch (err) {
-      //     console.error(err);
-      // } finally {
-      //     await client.end()
-      // }
 
 client.on("guildCreate", async (guild) => {
     await deployCommands({ guildId: guild.id });

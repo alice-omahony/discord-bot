@@ -1,4 +1,5 @@
 import { CommandInteraction, SlashCommandBuilder } from "discord.js";
+import { getClientCredentials } from "../backend/auth";
 
 export const data = new SlashCommandBuilder()
   .setName("ping")
@@ -6,5 +7,8 @@ export const data = new SlashCommandBuilder()
 
 
 export async function execute(interaction: CommandInteraction) {
+  getClientCredentials()
+    .then((res) => console.log(res));
+
   return interaction.reply("Pong!");
 }

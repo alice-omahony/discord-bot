@@ -32,10 +32,18 @@ export async function refreshAuthToken(token: string): Promise<AxiosResponse> {
   return await axios.post(`${apiBase}/oauth2/token`, data, {headers: headers})
 }
 
+export async function getClientCredentials(): Promise<AxiosResponse> {
+  const data = {
+    grant_type: 'client_credentials',
+    scope: "identify messages.read"
+  }
+  return await axios.post(`${apiBase}/oauth2/token`, data, {headers: headers})
+}
+
 export async function invalidateAuthToken(token: string): Promise<AxiosResponse> {
   const data = {
     token: token,
     token_type_hint: 'access_token'
   }
-  return await axios.post(`${apiBase}/oauth2/token/revoke`, data, {headers: headers})
+  return await axios.post(`${apiBase}/oauth2/token/`, data, {headers: headers})
 }
