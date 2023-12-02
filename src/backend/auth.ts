@@ -6,7 +6,7 @@ const clientSecret: string = config.OAUTH2_CLIENT_SECRET
 const apiBase: string = config.DISCORD_BASE_API
 const redirectUri: string = config.OAUTH2_REDIRECT_URI
 
-export async function getAuthToken(code: string) {
+export async function getAuthToken(code: string): Promise<AxiosResponse> {
   const data = {
     grant_type: 'authorization_code',
     code: code,
@@ -16,8 +16,7 @@ export async function getAuthToken(code: string) {
     'Authorization': `Basic ${createBasicAuthToken(clientId, clientSecret)}`,
     'Content-Type': 'application/x-www-form-urlencoded'
   };
-  const response: AxiosResponse = await axios.post(`${apiBase}/oauth2/token`, data, {headers: headers});
-  console.log(response.status, response.data);
+  return await axios.post(`${apiBase}/oauth2/token`, data, {headers: headers});
 }
 
 const createBasicAuthToken = (username: string, password: string) => {
