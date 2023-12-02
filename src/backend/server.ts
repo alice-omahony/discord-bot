@@ -34,6 +34,7 @@ app.get("/jeeves-bot/api/auth/redirect", async (req: ExpressRequest , res: Expre
     token: access_token,
     refresh_token: refresh_token,
     expire: expiresAt,
+    
     scopes: scopesList
   });
 
