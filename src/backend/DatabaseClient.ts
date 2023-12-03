@@ -12,7 +12,7 @@ export type QuoteData = {
   author: string,
   content: string,
   reporter: string,
-  timestamp: number
+  timestamp: string
 }
 
 const AUTH_TABLE_NAME: string = "auth";
@@ -39,7 +39,7 @@ export default class DatabaseClient {
 
   async saveMessages(messages: QuoteData[]): Promise<number> {
     const query = `INSERT INTO ${QUOTES_TABLE_NAME} (id, name, content, reporter, reported_at) VALUES ($1,$2,$3,$4,$5)`
-    const values = messages.map(msg => [msg.id, msg.author, msg.content, msg.reporter, msg.timestamp]);
+    const values = messages.flatMap(msg => [msg.id, msg.author, msg.content, msg.reporter, msg.timestamp]);
 
     console.log(query);
     console.log(values);
