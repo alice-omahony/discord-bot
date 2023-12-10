@@ -44,7 +44,7 @@ export async function execute(interaction: CommandInteraction) {
         id: msg.id,
         content: outputData.content,
         author: outputData.name,
-        timestamp: interaction.createdAt.toISOString(),
+        createdAt: interaction.createdAt.toISOString(),
         reporter: interaction.user.username
       }
     ]);
