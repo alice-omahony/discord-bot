@@ -1,5 +1,7 @@
-import {ActionRowBuilder, ApplicationCommandType, TextInputStyle, CommandInteraction, ContextMenuCommandBuilder, MessageContextMenuCommandInteraction, ModalActionRowComponentBuilder, ModalBuilder, TextInputBuilder, ModalSubmitInteraction} from "discord.js";
+import {ActionRowBuilder, ApplicationCommandType, TextInputStyle, CommandInteraction, ContextMenuCommandBuilder, MessageContextMenuCommandInteraction, ModalActionRowComponentBuilder, ModalBuilder, TextInputBuilder, ModalSubmitInteraction, TextChannel} from "discord.js";
 import { dbClient } from "../backend/server";
+import { config } from "../config";
+import axios, { AxiosResponse } from "axios";
 
 interface QuoteData {
   quote: string,
@@ -13,7 +15,7 @@ export const data = new ContextMenuCommandBuilder()
 export async function execute(interaction: CommandInteraction) {
   const cmcInteraction = interaction as MessageContextMenuCommandInteraction;
   const {quote, attribution} = extractQuoteFromInteraction(cmcInteraction);
-  
+
   // Create and add components to edit modal
   const editModal = new ModalBuilder()
   .setCustomId(`editModal_${cmcInteraction.targetMessage.id}`)
@@ -42,55 +44,47 @@ export async function execute(interaction: CommandInteraction) {
   await interaction.showModal(editModal);
 }
 
-export async function handleModalCallback(targetMsgId: string, interaction: ModalSubmitInteraction) {
-  // console.log(interaction)
-  console.log(targetMsgId);
-
-  const content = interaction.fields.getTextInputValue("editQuoteInput");
-  const attribution = interaction.fields.getTextInputValue("editQuoteAttributionInput");
-
+export async function handleModalCallback(targetMsgId: string, interaction: ModalSubmitInteraction, channel: TextChannel) {
+  const editedContent = interaction.fields.getTextInputValue("editQuoteInput");
+  const editedAttribution = interaction.fields.getTextInputValue("editQuoteAttributionInput");
 
   if(!dbClient) {
-    interaction.reply("Database current unavailable, unable to save quote.")
+    interaction.reply({content: "Database current unavailable, unable to save quote.", ephemeral: true});
   }
 
-  try{
-    const result = await dbClient?.update(
+  try {
+    await dbClient?.update(
       {
         id: targetMsgId,
-        content: content,
-        author: attribution,
+        content: editedContent,
+        author: editedAttribution,
         updatedAt: interaction.createdAt.toISOString()
       }
     );
+  
+    const msg = await channel.messages.fetch(targetMsgId);
+    await msg.edit(`"${editedContent}" - _${editedAttribution}_`);  
+    interaction.reply({content: "Successfully updated quote", ephemeral: true});
 
-      // TODO: Update the old message in place in the channel
-
-
-    interaction.reply({content: "Successfully updated quote", ephemeral: true})
-
-  } catch {() => {
-    console.error("something baaaad happened");
-  }}
-
-
-
-  // interaction.reply({content: "updated DB", ephemeral: true});
+  } catch { (err: Error) =>
+    interaction.reply({
+      content: `Unable to edit quote date, please try again later: ${err.message}`,
+      ephemeral: true
+    });
+  }
 }
 
 function extractQuoteFromInteraction(i: MessageContextMenuCommandInteraction): QuoteData  {
-  // TODO: Remove text formatting (quotation marks and italics)
-  const quoteContentRegex = /"([^"]*)"/;
-  const quoteAttributionRegex = /-\s*(.*)$/;
-
   const message = i.targetMessage.content;
 
-  const quoteContent = message.match(quoteContentRegex);
-  const quoteAttribution = message.match(quoteAttributionRegex);
+  const quoteSplit = "\" - _";
+  const quoteParts = message.split(quoteSplit);
 
+  const formattedQuoteContent = quoteParts.length === 2 ? quoteParts[0].trim().substring(1) : "Quote";
+  const formattedQuoteAttribution = quoteParts.length === 2 ? quoteParts[1].trim().substring(0, quoteParts[1].length - 1) : "Attribution";
 
   return {
-    quote: quoteContent ? quoteContent[0].trim() : "Quote",
-    attribution: quoteAttribution ? quoteAttribution[0].trim() : "Attribution"
+    quote: formattedQuoteContent,
+    attribution: formattedQuoteAttribution
   };
 }

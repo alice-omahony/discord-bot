@@ -48,9 +48,6 @@ export default class DatabaseClient {
   async saveMessages(messages: QuoteData[]): Promise<number> {
     const query = `INSERT INTO ${QUOTES_TABLE_NAME} (id, name, content, reporter, reported_at) VALUES ($1,$2,$3,$4,$5)`;
     const values = messages.flatMap(msg => [msg.id, msg.author, msg.content, msg.reporter, msg.createdAt]);
-
-    console.log(query);
-    console.log(values);
     
     const result: QueryResult = await this.client.query(query, values);
 

@@ -1,4 +1,4 @@
-import { Client, Events } from "discord.js";
+import { Client, Events, TextChannel } from "discord.js";
 
 import { deployCommands } from "./deploy-commands";
 import { commands } from "./commands";
@@ -22,13 +22,14 @@ client.on(Events.GuildCreate, async (guild) => {
 client.on(Events.InteractionCreate, async (interaction) => {
     if (!interaction.isModalSubmit()) return;
 
-    const [modalType, targetMsgId] = interaction.customId.split("_")
-
-
-    if (modalType === 'editModal') {
-      commands['edit_quote'].handleModalCallback(targetMsgId, interaction)
+    const [modalType, targetMsgId] = interaction.customId.split("_");
+    
+    if (modalType === 'editModal') {      
+      const channel = await client.channels.fetch("510376758705389571");
+      if(!channel) return;
+      
+      await commands['edit_quote'].handleModalCallback(targetMsgId, interaction, channel as TextChannel);
     }
-
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
