@@ -34,16 +34,24 @@ export async function execute(interaction: CommandInteraction) {
     interaction.reply("Database current unavailable, unable to save quote.")
   }
 
-  dbClient?.saveMessages([
-    {
-      id: interaction.id,
-      content: outputData.content,
-      author: outputData.name,
-      timestamp: interaction.createdAt.toISOString(),
-      reporter: interaction.user.username
-    }
-  ])
+  // TODO: rewrite this is a better way??
+  return interaction.reply({
+    content: `"${outputData.content}" - _${outputData.name}_`,
+    fetchReply: true
+  }).then( msg => {
+    dbClient?.saveMessages([
+      {
+        id: msg.id,
+        content: outputData.content,
+        author: outputData.name,
+        timestamp: interaction.createdAt.toISOString(),
+        reporter: interaction.user.username
+      }
+    ]);
+  }
+  ).catch(() => {
+    console.log("An issue occured while saving to the DB.");
+    // TODO: add followUp step here with ephemeral message if a message is not properly saved to the DB
+  });
 
-
-  return interaction.reply(`"${outputData.content}" - _${outputData.name}_`);
 }

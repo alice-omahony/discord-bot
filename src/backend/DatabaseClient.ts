@@ -47,6 +47,7 @@ export default class DatabaseClient {
     const result: QueryResult = await this.client.query(query, values);
 
     const exitCode = (result.rows) ? 0 : -1;
+    console.log(exitCode);
     return Promise.resolve(exitCode);
   }
 

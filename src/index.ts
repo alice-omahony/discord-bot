@@ -1,4 +1,4 @@
-import { Client } from "discord.js";
+import { Client, Events } from "discord.js";
 
 import { deployCommands } from "./deploy-commands";
 import { commands } from "./commands";
@@ -10,19 +10,29 @@ const client = new Client({
     intents: ["Guilds", "GuildMessages"],
 });
 
-client.once("ready", async () => {
+client.once(Events.ClientReady, async () => {
     console.log("Discord bot is ready! 🤖");
     startServer();
   });
 
-client.on("guildCreate", async (guild) => {
+client.on(Events.GuildCreate, async (guild) => {
     await deployCommands({ guildId: guild.id });
 });
 
-client.on("interactionCreate", async (interaction) => {
-    if (!interaction.isCommand()) {
-        return;
+client.on(Events.InteractionCreate, async (interaction) => {
+    if (!interaction.isModalSubmit()) return;
+
+    const [modalType, targetMsgId] = interaction.customId.split("_")
+
+
+    if (modalType === 'editModal') {
+      commands['edit_quote'].handleModalCallback(targetMsgId, interaction)
     }
+
+});
+
+client.on(Events.InteractionCreate, async (interaction) => {
+    if (!interaction.isCommand()) return;
 
     const { commandName } = interaction;
     if (commands[commandName as keyof typeof commands]) {

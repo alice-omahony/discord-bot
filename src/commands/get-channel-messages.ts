@@ -2,7 +2,6 @@ import { CommandInteraction, SlashCommandBuilder, Message } from "discord.js";
 import axios, { AxiosResponse } from "axios";
 import { config } from "../config";
 import { dbClient } from "../backend/server";
-import { QuoteData } from "../backend/DatabaseClient";
 
 export const data = new SlashCommandBuilder()
   .setName("get_channel_messages")
